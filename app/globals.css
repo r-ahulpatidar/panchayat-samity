@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* रंग: केसरिया (मुख्य बटन), हरा (WhatsApp/सफलता), गर्म हल्की पृष्ठभूमि। सभी AA कंट्रास्ट पर। */
+@theme inline {
+  --color-brand: #c2410c;
+  --color-brand-dark: #9a3412;
+  --color-brand-soft: #fff1e6;
+  --color-green: #166534;
+  --color-green-dark: #14532d;
+  --color-green-soft: #ecfdf3;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-line: #e7e0d8;
+  --color-paper: #fffbf5;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --font-sans: var(--font-deva), system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* देवनागरी की मात्राओं के लिए ज़्यादा लाइन-हाइट */
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
