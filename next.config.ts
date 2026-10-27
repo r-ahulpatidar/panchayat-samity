@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  images: {
+    // केवल शिकायतों की फोटो (Vercel Blob) — lib/complaints/public.ts की isComplaintPhotoUrl से मेल
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/complaints/**", search: "" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

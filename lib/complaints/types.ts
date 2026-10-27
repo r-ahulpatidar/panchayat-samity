@@ -22,7 +22,7 @@ export type SavedComplaint = ComplaintRecord & { id: string; row: number };
 
 /**
  * "समस्याओं की स्थिति" पेज पर दिखने वाली जानकारी — केवल सार्वजनिक फ़ील्ड।
- * नाम, मोबाइल, सटीक स्थान और फोटो यहां कभी नहीं आते।
+ * नाम, मोबाइल और सटीक स्थान यहां कभी नहीं आते।
  */
 export type PublicIssue = {
   id: string;
@@ -32,6 +32,7 @@ export type PublicIssue = {
   description: string; // मोबाइल नंबर छुपाकर
   statusId: StatusId;
   publicNote: string;
+  photoUrl: string; // "" = फोटो नहीं; केवल हमारे Vercel Blob स्टोर के लिंक
 };
 
 /**

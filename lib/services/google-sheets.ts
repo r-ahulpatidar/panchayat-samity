@@ -141,6 +141,7 @@ export function createSheetsRepository(config: Config): ComplaintRepository {
           description: v[6] ?? "",
           status: v[9] ?? "",
           publicNote: v[13] ?? "",
+          photoUrl: v[8] ?? "",
         })),
       );
     },

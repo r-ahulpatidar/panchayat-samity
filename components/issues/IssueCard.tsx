@@ -1,6 +1,7 @@
 import { getCategory } from "@/content/hi/categories";
 import { issuesPage as t } from "@/content/hi/status";
 import type { PublicIssue } from "@/lib/complaints/types";
+import { IssuePhoto } from "./IssuePhoto";
 import { ProgressSteps } from "./ProgressSteps";
 import { StatusBadge } from "./StatusBadge";
 
@@ -31,6 +32,10 @@ export function IssueCard({ issue, highlight = false }: { issue: PublicIssue; hi
       </p>
 
       <p className="line-clamp-4 whitespace-pre-line">{issue.description}</p>
+
+      {issue.photoUrl ? (
+        <IssuePhoto src={issue.photoUrl} alt={`${t.photoAlt}: ${category?.label ?? ""}, ${issue.village}`} />
+      ) : null}
 
       <ProgressSteps statusId={issue.statusId} />
 
