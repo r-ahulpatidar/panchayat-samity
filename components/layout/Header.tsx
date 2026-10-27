@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { common } from "@/content/hi/common";
 import { site } from "@/content/hi/site";
+import { MobileMenu } from "./MobileMenu";
 
-/** मोबाइल मेनू <details> से — बिना किसी JavaScript के। */
+/** डेस्कटॉप पर पूरा मेनू, मोबाइल पर MobileMenu (बाहर टैप करने पर बंद होता है) */
 export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
@@ -24,23 +25,7 @@ export function Header() {
           </ul>
         </nav>
 
-        <details className="group relative md:hidden">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-lg border border-line px-4 font-semibold [&::-webkit-details-marker]:hidden">
-            <span aria-hidden="true" className="text-xl">☰</span>
-            {common.menu}
-          </summary>
-          <nav aria-label="मुख्य" className="absolute right-0 mt-2 w-64 rounded-xl border border-line bg-white p-2 shadow-lg">
-            <ul>
-              {common.nav.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="block rounded-lg px-4 py-3 font-semibold hover:bg-brand-soft">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </details>
+        <MobileMenu />
       </div>
     </header>
   );
