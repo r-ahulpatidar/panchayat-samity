@@ -1,10 +1,10 @@
 import "server-only";
 import { JWT } from "google-auth-library";
-import { categories } from "@/content/hi/categories";
+import { DEFAULT_STATUS } from "@/content/hi/status";
+import { categoryIdFromLabel, toPublicIssues } from "@/lib/complaints/public";
 import { complaintIdFromRow, rowFromRange } from "@/lib/utils/complaint-id";
 import { sheetSafe } from "@/lib/utils/sanitize";
 import {
-  STATUS,
   WA_STATUS,
   type ComplaintRecord,
   type ComplaintRepository,
@@ -15,7 +15,8 @@ import {
 /**
  * शीट का कॉलम क्रम (पंक्ति 1 = हेडर)। README में हेडर की पूरी सूची है।
  * A आईडी | B तारीख | C नाम | D मोबाइल | E गांव | F श्रेणी | G विवरण
- * H स्थान | I फोटो URL | J स्थिति | K टिप्पणी | L WhatsApp स्थिति | M अनुरोध कुंजी
+ * H स्थान | I फोटो URL | J स्थिति | K टिप्पणी (आंतरिक) | L WhatsApp स्थिति | M अनुरोध कुंजी
+ * N वेबसाइट पर टिप्पणी — स्टाफ भरता है, "समस्याओं की स्थिति" पेज पर दिखती है
  */
 export const SHEET_HEADERS = [
   "शिकायत आईडी",
@@ -28,9 +29,10 @@ export const SHEET_HEADERS = [
   "स्थान",
   "फोटो URL",
   "स्थिति",
-  "टिप्पणी",
+  "टिप्पणी (आंतरिक)",
   "WhatsApp स्थिति",
   "अनुरोध कुंजी",
+  "वेबसाइट पर टिप्पणी",
 ] as const;
 
 const WA_STATUS_COLUMN = "L";
@@ -66,7 +68,7 @@ export function createSheetsRepository(config: Config): ComplaintRepository {
       sheetSafe(r.description),
       sheetSafe(location),
       r.photoUrl,
-      STATUS.pending,
+      DEFAULT_STATUS.label,
       r.remark,
       "",
       r.idempotencyKey,
@@ -106,7 +108,7 @@ export function createSheetsRepository(config: Config): ComplaintRepository {
       rows.forEach((v, i) => {
         if (v[11] !== WA_STATUS.failed || !v[0]) return;
         const categoryLabel = v[5] ?? "";
-        const categoryId = categories.find((c) => c.label === categoryLabel)?.id ?? "anya";
+        const categoryId = categoryIdFromLabel(categoryLabel);
         failed.push({
           id: v[0],
           row: i + 2,
@@ -126,6 +128,21 @@ export function createSheetsRepository(config: Config): ComplaintRepository {
         });
       });
       return failed;
+    },
+
+    async listPublic() {
+      const res = await request<{ values?: string[][] }>(`${base}/${range("A2:N")}`, "GET");
+      return toPublicIssues(
+        (res.values ?? []).map((v) => ({
+          id: v[0] ?? "",
+          receivedAt: v[1] ?? "",
+          village: v[4] ?? "",
+          categoryLabel: v[5] ?? "",
+          description: v[6] ?? "",
+          status: v[9] ?? "",
+          publicNote: v[13] ?? "",
+        })),
+      );
     },
   };
 }

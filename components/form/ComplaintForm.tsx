@@ -260,13 +260,19 @@ export function ComplaintForm() {
         {errors.category?.message ? <FieldError id="category-error" message={errors.category.message} /> : null}
       </fieldset>
 
-      <Field id="description" label={f.description.label} required error={errors.description?.message}>
+      <Field
+        id="description"
+        label={f.description.label}
+        required
+        hint={f.description.hint}
+        error={errors.description?.message}
+      >
         <textarea
           id="description"
           rows={5}
           placeholder={f.description.placeholder}
           aria-invalid={Boolean(errors.description)}
-          aria-describedby={describedBy("description", { error: Boolean(errors.description) })}
+          aria-describedby={describedBy("description", { hint: true, error: Boolean(errors.description) })}
           className={inputClass(Boolean(errors.description))}
           {...register("description")}
         />

@@ -53,9 +53,25 @@ Code map: `lib/complaints/submit.ts` (orchestration) · `lib/services/*` (sheets
    - `GOOGLE_SHEET_ID`: the part of the Sheet URL between `/d/` and `/edit`
    - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: `client_email` from the JSON
    - `GOOGLE_PRIVATE_KEY`: `private_key` from the JSON, on one line with the `\n` escapes, in double quotes
-6. Run **`npm run sheet:setup`**. It renames the tab to `शिकायतें`, writes the header row (A→M), freezes it, adds the स्थिति dropdown (लंबित / कार्य प्रगति पर / समाधान हो गया) with colours, and hides the अनुरोध कुंजी column. It is safe to re-run.
+6. Run **`npm run sheet:setup`**. It renames the tab to `शिकायतें`, writes the header row (A→N), freezes it, adds the स्थिति dropdown with colours, hides the अनुरोध कुंजी column, and tints the public-note column N green. It is safe to re-run.
 
-How IDs work: the server appends the row, reads the row number that Google returns (e.g. row 43), and writes `JK-2026-0042` into column A. Appends are atomic, so concurrent submits never share an ID. **Don't delete rows** (that would shift numbering); mark them in टिप्पणी instead. Change `COMPLAINT_ID_PREFIX` each year if you want a new series.
+How IDs work: the server appends the row, reads the row number that Google returns (e.g. row 43), and writes `JK-2026-0042` into column A. Appends are atomic, so concurrent submits never share an ID. **Never delete rows**: a later complaint would then reuse an existing ID. To remove a duplicate, spam or test complaint from the website, set its स्थिति to **छुपाएं**. Change `COMPLAINT_ID_PREFIX` each year if you want a new series.
+
+### Status tracking (`/samasya-sthiti`)
+
+Staff manage progress from the Sheet; the public page updates within about a minute (new complaints appear immediately).
+
+| स्थिति (column J) | On website | Use when |
+|---|---|---|
+| लंबित | ✅ (default) | Received, work not started |
+| कार्य प्रगति पर | ✅ | Work has started |
+| विभाग को भेजा गया | ✅ | Forwarded to a government department (bijli, PHED, PWD…) |
+| पूर्ण | ✅ | Solved |
+| छुपाएं | ❌ | Duplicate, spam, test or private complaint |
+
+- **Column N "वेबसाइट पर टिप्पणी"** is shown on the issue's card as "📢 ताज़ा जानकारी" (e.g. "ठेकेदार को काम दिया, 15 नवंबर तक पूरा होगा"). Column K "टिप्पणी (आंतरिक)" stays private.
+- The page shows only ID, date, village, category, description, status and the public note — never name, mobile, exact location or photo. Phone numbers inside descriptions/notes are masked automatically.
+- Status options live in `content/hi/status.ts`; keep `scripts/setup-sheet.mjs` in sync and re-run `npm run sheet:setup` after changing them.
 
 ## 2. Photo upload: Vercel Blob
 

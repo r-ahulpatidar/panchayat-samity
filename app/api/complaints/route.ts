@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { after } from "next/server";
+import { ISSUES_CACHE_TAG } from "@/lib/complaints/public-issues";
 import { notifyAndRecord, submitComplaint, type SubmitErrorCode } from "@/lib/complaints/submit";
 
 export const maxDuration = 30;
@@ -29,7 +31,11 @@ export async function POST(request: Request) {
 
   // शिकायत सेव हो चुकी है — WhatsApp जवाब भेजने के बाद, ताकि उसकी देरी/विफलता उपयोगकर्ता को न रोके
   const saved = result.saved;
-  if (saved) after(() => notifyAndRecord(saved));
+  if (saved) {
+    // स्थिति पेज अगली विज़िट पर ताज़ा डेटा पढ़े, ताकि नई शिकायत तुरंत दिखे
+    revalidateTag(ISSUES_CACHE_TAG, { expire: 0 });
+    after(() => notifyAndRecord(saved));
+  }
 
   return Response.json({ ok: true, id: result.id });
 }

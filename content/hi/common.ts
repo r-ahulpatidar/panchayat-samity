@@ -9,6 +9,7 @@ export const common = {
   nav: [
     { href: "/", label: "मुख्य पृष्ठ" },
     { href: "/samasya-batayen", label: "समस्या बताएं" },
+    { href: "/samasya-sthiti", label: "समस्याओं की स्थिति" },
     { href: "/prathmiktayen", label: "प्राथमिकताएं" },
     { href: "/hamare-bare-mein", label: "हमारे बारे में" },
     { href: "/sampark", label: "संपर्क करें" },

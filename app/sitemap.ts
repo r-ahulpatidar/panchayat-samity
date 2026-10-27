@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     { path: "", priority: 1 },
     { path: "/samasya-batayen", priority: 0.9 },
+    { path: "/samasya-sthiti", priority: 0.8 },
     { path: "/prathmiktayen", priority: 0.7 },
     { path: "/hamare-bare-mein", priority: 0.7 },
     { path: "/sampark", priority: 0.6 },

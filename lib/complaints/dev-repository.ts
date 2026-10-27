@@ -1,5 +1,7 @@
 import "server-only";
+import { DEFAULT_STATUS } from "@/content/hi/status";
 import { complaintIdFromRow } from "@/lib/utils/complaint-id";
+import { toPublicIssues } from "./public";
 import type { ComplaintRepository, SavedComplaint } from "./types";
 
 /**
@@ -22,6 +24,11 @@ export function createDevRepository(idPrefix: string): ComplaintRepository {
     },
     async listWhatsAppFailed() {
       return [];
+    },
+    async listPublic() {
+      return toPublicIssues(
+        store.map((c) => ({ ...c, status: DEFAULT_STATUS.label, publicNote: "" })),
+      );
     },
   };
 }

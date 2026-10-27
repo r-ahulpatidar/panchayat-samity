@@ -22,7 +22,7 @@ if (!email || !key || !sheetId) {
   process.exit(1);
 }
 
-// lib/services/google-sheets.ts के SHEET_HEADERS और lib/complaints/types.ts के STATUS से मेल खाना चाहिए
+// lib/services/google-sheets.ts के SHEET_HEADERS और content/hi/status.ts के statuses से मेल खाना चाहिए
 const HEADERS = [
   "शिकायत आईडी",
   "प्राप्ति तिथि",
@@ -34,18 +34,23 @@ const HEADERS = [
   "स्थान",
   "फोटो URL",
   "स्थिति",
-  "टिप्पणी",
+  "टिप्पणी (आंतरिक)",
   "WhatsApp स्थिति",
   "अनुरोध कुंजी",
+  "वेबसाइट पर टिप्पणी",
 ];
+// ड्रॉपडाउन का क्रम = काम का क्रम; "छुपाएं" वाली शिकायत वेबसाइट पर नहीं दिखती
 const STATUS = [
   { value: "लंबित", color: { red: 1, green: 0.95, blue: 0.8 } },
   { value: "कार्य प्रगति पर", color: { red: 0.85, green: 0.92, blue: 1 } },
-  { value: "समाधान हो गया", color: { red: 0.85, green: 0.96, blue: 0.87 } },
+  { value: "विभाग को भेजा गया", color: { red: 0.93, green: 0.9, blue: 1 } },
+  { value: "पूर्ण", color: { red: 0.85, green: 0.96, blue: 0.87 } },
+  { value: "छुपाएं", color: { red: 0.9, green: 0.9, blue: 0.9 } },
 ];
 const STATUS_COL = 9; // J
 const KEY_COL = 12; // M
-const WIDTHS = [130, 140, 160, 120, 120, 120, 380, 220, 220, 140, 220, 130, 100];
+const PUBLIC_NOTE_COL = 13; // N
+const WIDTHS = [130, 140, 160, 120, 120, 120, 380, 220, 220, 160, 220, 130, 100, 300];
 
 const auth = new JWT({ email, key, scopes: ["https://www.googleapis.com/auth/spreadsheets"] });
 const api = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`;
@@ -120,32 +125,42 @@ try {
     })),
   );
 
-  // स्थिति के रंग — पहले से हों तो दोबारा न जोड़ें
+  // वेबसाइट वाली टिप्पणी का कॉलम हल्के हरे रंग में, ताकि स्टाफ को पता रहे यह सार्वजनिक है
+  requests.push({
+    repeatCell: {
+      range: { sheetId: id, startRowIndex: 1, startColumnIndex: PUBLIC_NOTE_COL, endColumnIndex: PUBLIC_NOTE_COL + 1 },
+      cell: { userEnteredFormat: { backgroundColor: { red: 0.93, green: 0.99, blue: 0.95 }, wrapStrategy: "WRAP" } },
+      fields: "userEnteredFormat(backgroundColor,wrapStrategy)",
+    },
+  });
+
+  // स्थिति के रंग — पुराने नियम हटाकर नए जोड़ें (दोबारा चलाना सुरक्षित)
   const cf = await call(`${api}?fields=sheets(properties.sheetId,conditionalFormats)`);
   const existing = cf.sheets.find((s) => s.properties.sheetId === id)?.conditionalFormats ?? [];
-  if (existing.length === 0) {
-    STATUS.forEach((s, index) =>
-      requests.push({
-        addConditionalFormatRule: {
-          index,
-          rule: {
-            ranges: [{ sheetId: id, startRowIndex: 1, startColumnIndex: STATUS_COL, endColumnIndex: STATUS_COL + 1 }],
-            booleanRule: {
-              condition: { type: "TEXT_EQ", values: [{ userEnteredValue: s.value }] },
-              format: { backgroundColor: s.color },
-            },
+  for (let i = existing.length - 1; i >= 0; i--) {
+    requests.push({ deleteConditionalFormatRule: { sheetId: id, index: i } });
+  }
+  STATUS.forEach((s, index) =>
+    requests.push({
+      addConditionalFormatRule: {
+        index,
+        rule: {
+          ranges: [{ sheetId: id, startRowIndex: 1, startColumnIndex: STATUS_COL, endColumnIndex: STATUS_COL + 1 }],
+          booleanRule: {
+            condition: { type: "TEXT_EQ", values: [{ userEnteredValue: s.value }] },
+            format: { backgroundColor: s.color },
           },
         },
-      }),
-    );
-  }
+      },
+    }),
+  );
 
   await call(`${api}:batchUpdate`, "POST", { requests });
 
-  const range = encodeURIComponent(`'${tab}'!A1:M1`);
+  const range = encodeURIComponent(`'${tab}'!A1:N1`);
   await call(`${api}/values/${range}?valueInputOption=RAW`, "PUT", { values: [HEADERS] });
 
-  console.log("✓ हेडर पंक्ति, फ्रीज़, स्थिति ड्रॉपडाउन और रंग सेट हो गए");
+  console.log("✓ हेडर पंक्ति, फ्रीज़, स्थिति ड्रॉपडाउन (5 विकल्प), रंग और 'वेबसाइट पर टिप्पणी' कॉलम सेट हो गए");
   console.log(`\nशीट तैयार है: https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
 } catch (error) {
   const status = error?.response?.status;

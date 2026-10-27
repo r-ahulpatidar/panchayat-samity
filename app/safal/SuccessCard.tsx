@@ -60,6 +60,11 @@ export function SuccessCard() {
       )}
 
       <div className="grid gap-3">
+        {id ? (
+          <ButtonLink href={`/samasya-sthiti?id=${encodeURIComponent(id)}`} variant="outline">
+            {t.trackStatus}
+          </ButtonLink>
+        ) : null}
         <ButtonLink href="/samasya-batayen" variant="primary">
           {t.another}
         </ButtonLink>

@@ -91,6 +91,15 @@ export default function HomePage() {
         </ol>
       </section>
 
+      {/* स्थिति पेज */}
+      <section className="mt-10 space-y-3 rounded-3xl bg-white p-5 ring-1 ring-line md:p-8">
+        <h2 className="text-2xl font-bold">{home.statusTitle}</h2>
+        <p>{home.statusBody}</p>
+        <ButtonLink href="/samasya-sthiti" variant="outline" className="w-full md:w-auto">
+          {home.statusCta}
+        </ButtonLink>
+      </section>
+
       {/* श्रेणियां */}
       <section className="mt-10 space-y-4">
         <div>
